@@ -6,6 +6,7 @@ COLS = 9
 recursion_counter = 0
 changed_value_counter = 0
 
+
 def find_empty_cell(board):
     for row in range(ROWS):
         for col in range(COLS):
@@ -65,17 +66,19 @@ def print_board(board):
                 print("|", end=" ")
             print(board[row][col], end=" ")
         print("")
+    print("")
 
 
 def main():
 
     input_board = sudoku_3star_2
+    print("Input board:")
     print_board(input_board)
-    print("Solved:")
+    print("Solved board:")
     solve(input_board)
     print_board(input_board)
-    print("Recursion counter: {}", recursion_counter)
-    print(changed_value_counter)
+    print("Recursion counter:", recursion_counter)
+    print("Value change counter:", changed_value_counter)
 
 
 main()

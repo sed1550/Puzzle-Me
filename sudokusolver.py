@@ -68,15 +68,12 @@ def find_least_possible_values_cell(board, possible_values_tracker):
 def solve_with_mrv(board):
     global recursion_counter, changed_value_counter
     recursion_counter += 1
-    print("New board:")
-    print_board(board)
     possible_values_tracker = record_possible_values_for_empty_cells(board)
-    print(possible_values_tracker)
-    print(len(possible_values_tracker))
+    # print(possible_values_tracker)
+    print("# empty cells for current board:", len(possible_values_tracker))
     empty_cell = find_least_possible_values_cell(board, possible_values_tracker)
     if not empty_cell:
         return True
-    print(empty_cell)
     empty_cell_pv_list = possible_values_tracker.get(empty_cell)
     empty_cell_row, empty_cell_col = empty_cell
     for value in empty_cell_pv_list:
@@ -98,17 +95,19 @@ def print_board(board):
                 print("|", end=" ")
             print(board[row][col], end=" ")
         print("")
+    print("")
 
 
 def main():
     # 2-star difficulty
     input_board = sudoku_3star_2
+    print("Input board:")
     print_board(input_board)
     solve_with_mrv(input_board)
-    print("Solved:")
+    print("\nSolved board:")
     print_board(input_board)
-    print("Recursion counter: {}", recursion_counter)
-    print(changed_value_counter)
+    print("Recursion counter:", recursion_counter)
+    print("Value change counter:", changed_value_counter)
 
 
 main()
