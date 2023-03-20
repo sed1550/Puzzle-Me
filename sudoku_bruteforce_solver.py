@@ -1,6 +1,10 @@
+from sudokupuzzles import *
+
+
 ROWS = 9
 COLS = 9
-
+recursion_counter = 0
+changed_value_counter = 0
 
 def find_empty_cell(board):
     for row in range(ROWS):
@@ -8,6 +12,7 @@ def find_empty_cell(board):
             if board[row][col] == 0:
                 return row, col
     return None
+
 
 def is_valid_entry(board, number, position):
     entry_row, entry_col = position
@@ -35,6 +40,8 @@ def is_valid_entry(board, number, position):
 
 
 def solve(board):
+    global recursion_counter, changed_value_counter
+    recursion_counter += 1
     empty_position = find_empty_cell(board)
     if not empty_position:
         return True
@@ -44,6 +51,7 @@ def solve(board):
             board[row][col] = value
             if solve(board):
                 return True
+            changed_value_counter += 1
             board[row][col] = 0
     return False
 
@@ -60,21 +68,14 @@ def print_board(board):
 
 
 def main():
-    # 2-star difficulty
-    input_board = [[0, 0, 0, 2, 5, 1, 0, 0, 0],
-                   [0, 0, 0, 9, 0, 6, 0, 0, 0],
-                   [0, 0, 7, 0, 0, 0, 1, 0, 0],
-                   [0, 0, 3, 0, 1, 0, 4, 0, 0],
-                   [0, 1, 0, 8, 0, 7, 0, 9, 0],
-                   [0, 7, 0, 5, 9, 4, 0, 1, 0],
-                   [0, 3, 0, 0, 0, 0, 0, 2, 0],
-                   [8, 0, 0, 7, 2, 5, 0, 0, 3],
-                   [9, 2, 5, 0, 0, 0, 8, 7, 4]]
 
+    input_board = sudoku_3star_2
     print_board(input_board)
     print("Solved:")
     solve(input_board)
     print_board(input_board)
+    print("Recursion counter: {}", recursion_counter)
+    print(changed_value_counter)
 
 
 main()

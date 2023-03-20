@@ -1,5 +1,10 @@
+from sudokupuzzles import *
+
+
 ROWS = 9
 COLS = 9
+recursion_counter = 0
+changed_value_counter = 0
 
 
 def is_valid_value(value, board, cell_row, cell_col):
@@ -61,10 +66,13 @@ def find_least_possible_values_cell(board, possible_values_tracker):
 
 
 def solve_with_mrv(board):
+    global recursion_counter, changed_value_counter
+    recursion_counter += 1
     print("New board:")
     print_board(board)
     possible_values_tracker = record_possible_values_for_empty_cells(board)
     print(possible_values_tracker)
+    print(len(possible_values_tracker))
     empty_cell = find_least_possible_values_cell(board, possible_values_tracker)
     if not empty_cell:
         return True
@@ -76,6 +84,7 @@ def solve_with_mrv(board):
         # check is_valid_value?
         if solve_with_mrv(board):
             return True
+        changed_value_counter += 1
         board[empty_cell_row][empty_cell_col] = 0
     return False
 
@@ -93,20 +102,13 @@ def print_board(board):
 
 def main():
     # 2-star difficulty
-    input_board = [[0, 0, 0, 2, 5, 1, 0, 0, 0],
-                   [0, 0, 0, 9, 0, 6, 0, 0, 0],
-                   [0, 0, 7, 0, 0, 0, 1, 0, 0],
-                   [0, 0, 3, 0, 1, 0, 4, 0, 0],
-                   [0, 1, 0, 8, 0, 7, 0, 9, 0],
-                   [0, 7, 0, 5, 9, 4, 0, 1, 0],
-                   [0, 3, 0, 0, 0, 0, 0, 2, 0],
-                   [8, 0, 0, 7, 2, 5, 0, 0, 3],
-                   [9, 2, 5, 0, 0, 0, 8, 7, 4]]
-
+    input_board = sudoku_3star_2
     print_board(input_board)
     solve_with_mrv(input_board)
     print("Solved:")
     print_board(input_board)
+    print("Recursion counter: {}", recursion_counter)
+    print(changed_value_counter)
 
 
 main()
