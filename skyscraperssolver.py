@@ -5,14 +5,6 @@ recursion_counter = 0
 changed_value_counter = 0
 
 
-def find_empty_cell(board):
-    for row in range(SIZE):
-        for col in range(SIZE):
-            if board[row][col] == 0:
-                return row, col
-    return None
-
-
 def check_north_view(value, border_value, board, cell_row, cell_col):
     max_value = 0
     count = 0
@@ -134,6 +126,58 @@ def is_valid_value(value, borders, board, cell_row, cell_col):
     return True
 
 
+def get_possible_values_list(borders, board, row, col):
+    possible_values = []
+    for value in range(1, SIZE+1):
+        if is_valid_value(value, borders, board, row, col):
+            possible_values.append(value)
+    return possible_values
+
+
+def record_possible_values_for_empty_cells(borders, board):
+    possible_values_tracker = {}
+    for row in range(SIZE):
+        for col in range(SIZE):
+            if board[row][col] == 0:
+                possible_values_list = get_possible_values_list(borders, board, row, col)
+                possible_values_tracker[(row, col)] = possible_values_list
+    return possible_values_tracker
+
+
+def find_least_possible_values_cell(board, possible_values_tracker):
+    # initialize default values
+    least_number_of_possible_values = SIZE
+    cell_position = None
+    for row in range(SIZE):
+        for col in range(SIZE):
+            if board[row][col] == 0:
+                current_cell_possible_values_list = possible_values_tracker[(row, col)]
+                current_possible_values_num = len(current_cell_possible_values_list)
+                if current_possible_values_num <= least_number_of_possible_values:
+                    least_number_of_possible_values = current_possible_values_num
+                    cell_position = row, col
+    return cell_position
+
+
+def solve_with_mrv(borders, board):
+    # print_board(borders, board)
+    global recursion_counter, changed_value_counter
+    recursion_counter += 1
+    possible_values_tracker = record_possible_values_for_empty_cells(borders, board)
+    empty_cell = find_least_possible_values_cell(board, possible_values_tracker)
+    if not empty_cell:
+        return True
+    empty_cell_pv_list = possible_values_tracker.get(empty_cell)
+    empty_cell_row, empty_cell_col = empty_cell
+    for value in empty_cell_pv_list:
+        board[empty_cell_row][empty_cell_col] = value
+        if solve_with_mrv(borders, board):
+            return True
+        changed_value_counter += 1
+        board[empty_cell_row][empty_cell_col] = 0
+    return False
+
+
 def print_board(borders, board):
     n_view = borders[0]
     e_view = borders[1]
@@ -161,24 +205,6 @@ def print_board(borders, board):
     print("")
 
 
-def solve(borders, board):
-    # print_board(borders, board)
-    global recursion_counter, changed_value_counter
-    recursion_counter += 1
-    empty_cell = find_empty_cell(board)
-    if not empty_cell:
-        return True
-    cell_row, cell_col = empty_cell
-    for value in range(1, SIZE + 1):
-        if is_valid_value(value, borders, board, cell_row, cell_col):
-            board[cell_row][cell_col] = value
-            if solve(borders, board):
-                return True
-            changed_value_counter += 1
-            board[cell_row][cell_col] = 0
-    return False
-
-
 def main():
     input_borders = skyscrapers_borders_2s3
     input_board = skyscrapers_board_2s3
@@ -186,7 +212,7 @@ def main():
     SIZE = len(input_board)
     print("Input board:")
     print_board(input_borders, input_board)
-    solve(input_borders, input_board)
+    solve_with_mrv(input_borders, input_board)
     print("\nSolved board:")
     print_board(input_borders, input_board)
     print("Recursion counter:", recursion_counter)

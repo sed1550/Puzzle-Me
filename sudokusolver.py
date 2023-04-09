@@ -89,7 +89,7 @@ def solve_with_mrv(board):
 def print_board(board):
     for row in range(ROWS):
         if row != 0 and row % 3 == 0:
-            print('_' * 21)
+            print('-' * 21)
         for col in range(COLS):
             if col != 0 and col % 3 == 0:
                 print("|", end=" ")
