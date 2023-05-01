@@ -206,8 +206,8 @@ def print_board(borders, board):
 
 
 def main():
-    input_borders = skyscrapers_borders_2s3
-    input_board = skyscrapers_board_2s3
+    input_borders = skyscrapers_borders_5h2
+    input_board = skyscrapers_board_5h2
     global SIZE
     SIZE = len(input_board)
     print("Input board:")
