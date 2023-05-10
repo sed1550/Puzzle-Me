@@ -1,10 +1,16 @@
-from sudokupuzzles import *
-
+from sudoku_puzzles.pppuzzles import *
+from sudoku_puzzles.gm_puzzles import *
 
 ROWS = 9
 COLS = 9
 recursion_counter = 0
 changed_value_counter = 0
+dead_end_counter = 0
+longest_backtrace = 0
+# guess_counter = 0
+
+is_backtracking = False
+curr_backtrace_depth = 0
 
 
 def find_empty_cell(board):
@@ -40,8 +46,19 @@ def is_valid_entry(board, number, position):
     return True
 
 
+def update_backtracking_metrics():
+    global is_backtracking, curr_backtrace_depth, dead_end_counter, longest_backtrace
+    if is_backtracking:
+        if curr_backtrace_depth > longest_backtrace:
+            longest_backtrace = curr_backtrace_depth
+        curr_backtrace_depth = 0
+        dead_end_counter += 1
+        is_backtracking = False
+
+
 def solve(board):
-    global recursion_counter, changed_value_counter
+    global recursion_counter, changed_value_counter, is_backtracking, curr_backtrace_depth
+    update_backtracking_metrics()
     recursion_counter += 1
     empty_position = find_empty_cell(board)
     if not empty_position:
@@ -54,6 +71,8 @@ def solve(board):
                 return True
             changed_value_counter += 1
             board[row][col] = 0
+    is_backtracking = True
+    curr_backtrace_depth += 1
     return False
 
 
@@ -71,7 +90,7 @@ def print_board(board):
 
 def main():
 
-    input_board = sudoku_3star_2
+    input_board = gm_10
     print("Input board:")
     print_board(input_board)
     print("Solved board:")
@@ -79,6 +98,8 @@ def main():
     print_board(input_board)
     print("Recursion counter:", recursion_counter)
     print("Value change counter:", changed_value_counter)
+    print("Dead end counter: ", dead_end_counter)
+    print("Longest backtrace: ", longest_backtrace)
 
 
 main()
