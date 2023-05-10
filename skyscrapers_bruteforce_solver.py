@@ -1,4 +1,4 @@
-from skyscraperspuzzles import *
+from skyscrapers_puzzles.gmpuzzles_6x6 import *
 
 SIZE = 4
 recursion_counter = 0
@@ -180,8 +180,8 @@ def solve(borders, board):
 
 
 def main():
-    input_borders = skyscrapers_borders_5n2
-    input_board = skyscrapers_board_5n2
+    input_borders = gm_borders_6x6_9
+    input_board = gm_board_6x6_9
     global SIZE
     SIZE = len(input_board)
     print("Input board:")

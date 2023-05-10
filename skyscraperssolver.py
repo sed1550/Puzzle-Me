@@ -1,11 +1,26 @@
+from skyscrapers_puzzles.gmpuzzles_6x6 import *
+from skyscrapers_puzzles.pppuzzles_6x6 import *
+from skyscrapers_puzzles.gmpuzzles_5x5 import *
+from skyscrapers_puzzles.pppuzzles_5x5 import *
 from skyscraperspuzzles import *
 
 SIZE = 4
+
 recursion_counter = 0
 changed_value_counter = 0
+dead_end_counter = 0
+longest_backtrace = 0
+guess_counter = 0
+
+is_backtracking = False
+curr_backtrace_depth = 0
 
 
 def check_north_view(value, border_value, board, cell_row, cell_col):
+    invalid_values = [SIZE-count for count in range(border_value-1-cell_row)]
+    if value in invalid_values:
+        return False
+
     max_value = 0
     count = 0
     for row in range(SIZE):
@@ -26,6 +41,10 @@ def check_north_view(value, border_value, board, cell_row, cell_col):
 
 
 def check_south_view(value, border_value, board, cell_row, cell_col):
+    invalid_values = [SIZE-count for count in range(border_value-1-(SIZE-1-cell_row))]
+    if value in invalid_values:
+        return False
+
     max_value = 0
     count = 0
     for row in range(SIZE-1, -1, -1):
@@ -46,6 +65,10 @@ def check_south_view(value, border_value, board, cell_row, cell_col):
 
 
 def check_west_view(value, border_value, board, cell_row, cell_col):
+    invalid_values = [SIZE-count for count in range(border_value-1-cell_col)]
+    if value in invalid_values:
+        return False
+
     max_value = 0
     count = 0
     for col in range(SIZE):
@@ -66,6 +89,10 @@ def check_west_view(value, border_value, board, cell_row, cell_col):
 
 
 def check_east_view(value, border_value, board, cell_row, cell_col):
+    invalid_values = [SIZE-count for count in range(border_value-1-(SIZE-1-cell_col))]
+    if value in invalid_values:
+        return False
+
     max_value = 0
     count = 0
     for col in range(SIZE-1, -1, -1):
@@ -159,9 +186,61 @@ def find_least_possible_values_cell(board, possible_values_tracker):
     return cell_position
 
 
+def fill_all_skyscrapers_north(board, idx):
+    for row in range(SIZE):
+        board[row][idx] = row + 1
+
+
+def fill_all_skyscrapers_south(board, idx):
+    for row in range(SIZE):
+        board[row][idx] = SIZE - row
+
+
+def fill_all_skyscrapers_west(board, idx):
+    for col in range(SIZE):
+        board[idx][col] = col + 1
+
+
+def fill_all_skyscrapers_east(board, idx):
+    for col in range(SIZE):
+        board[idx][col] = SIZE - col
+
+
+def fill_known_values(borders, board):
+    for border in range(4):
+        for idx in range(SIZE):
+            value = borders[border][idx]
+            if value == 1:
+                row, col = None, None
+                match border:
+                    case 0: row, col = 0, idx
+                    case 1: row, col = idx, SIZE-1
+                    case 2: row, col = SIZE-1, idx
+                    case 3: row, col = idx, 0
+                board[row][col] = SIZE
+            if value == SIZE:
+                match border:
+                    case 0: fill_all_skyscrapers_north(board, idx)
+                    case 1: fill_all_skyscrapers_east(board, idx)
+                    case 2: fill_all_skyscrapers_south(board, idx)
+                    case 3: fill_all_skyscrapers_west(board, idx)
+
+
+def update_backtracking_metrics():
+    global is_backtracking, curr_backtrace_depth, dead_end_counter, longest_backtrace
+    if is_backtracking:
+        if curr_backtrace_depth > longest_backtrace:
+            longest_backtrace = curr_backtrace_depth
+        curr_backtrace_depth = 0
+        dead_end_counter += 1
+        is_backtracking = False
+
+
 def solve_with_mrv(borders, board):
     # print_board(borders, board)
-    global recursion_counter, changed_value_counter
+    # print("")
+    global recursion_counter, changed_value_counter, guess_counter, is_backtracking, curr_backtrace_depth
+    update_backtracking_metrics()
     recursion_counter += 1
     possible_values_tracker = record_possible_values_for_empty_cells(borders, board)
     empty_cell = find_least_possible_values_cell(board, possible_values_tracker)
@@ -169,12 +248,16 @@ def solve_with_mrv(borders, board):
         return True
     empty_cell_pv_list = possible_values_tracker.get(empty_cell)
     empty_cell_row, empty_cell_col = empty_cell
-    for value in empty_cell_pv_list:
-        board[empty_cell_row][empty_cell_col] = value
+    for idx in range(len(empty_cell_pv_list)):
+        board[empty_cell_row][empty_cell_col] = empty_cell_pv_list[idx]
+        if len(empty_cell_pv_list) > 1 and idx != len(empty_cell_pv_list)-1:
+            guess_counter += 1
         if solve_with_mrv(borders, board):
             return True
         changed_value_counter += 1
         board[empty_cell_row][empty_cell_col] = 0
+    is_backtracking = True
+    curr_backtrace_depth += 1
     return False
 
 
@@ -206,17 +289,21 @@ def print_board(borders, board):
 
 
 def main():
-    input_borders = skyscrapers_borders_5h2
-    input_board = skyscrapers_board_5h2
+    input_borders = skyscrapers_borders_5h3
+    input_board = skyscrapers_board_5h3
     global SIZE
     SIZE = len(input_board)
     print("Input board:")
     print_board(input_borders, input_board)
+    fill_known_values(input_borders, input_board)
     solve_with_mrv(input_borders, input_board)
     print("\nSolved board:")
     print_board(input_borders, input_board)
     print("Recursion counter:", recursion_counter)
     print("Value change counter:", changed_value_counter)
+    print("Guess counter: ", guess_counter)
+    print("Dead end counter: ", dead_end_counter)
+    print("Longest backtrace: ", longest_backtrace)
 
 
 main()
