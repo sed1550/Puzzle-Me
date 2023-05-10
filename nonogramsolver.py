@@ -2,9 +2,14 @@ import numpy as np
 from itertools import combinations
 
 from nonogramspuzzles import *
+from nonograms_puzzles.nonograms_20x20 import *
 
 ROWS = 0
 COLS = 0
+
+iteration_counter = 0
+indices_scanned = 0
+unsure_indices = 0
 
 
 def find_possibilities(black_groups, no_of_groups, no_of_remaining_spaces):
@@ -82,6 +87,7 @@ def is_solved_board(solved_rows, solved_cols):
 
 
 def solve(row_list, col_list, board):
+    global iteration_counter, indices_scanned, unsure_indices
     # define all possibilities
     row_possibilities = list_all_possibilities(row_list, len(col_list))
     col_possibilities = list_all_possibilities(col_list, len(row_list))
@@ -90,11 +96,13 @@ def solve(row_list, col_list, board):
     solved_cols = [0] * COLS
     solved = False
     while not solved:
+        iteration_counter += 1
         unsolved_rows = get_all_unsolved_indices(row_possibilities, solved_rows, 1)
         unsolved_cols = get_all_unsolved_indices(col_possibilities, solved_cols, 0)
         # sort all unsolved rows and cols in the order of the least possibilities
         all_unsolved = sorted(unsolved_rows + unsolved_cols, key=lambda element: element[1])
-
+        indices_scanned += len(all_unsolved)
+        # print_board(row_list, col_list, board)
         for idx, _, is_row in all_unsolved:
             if not is_solved_index(solved_rows, solved_cols, idx, is_row):
                 if is_row:
@@ -102,6 +110,10 @@ def solve(row_list, col_list, board):
                 else:
                     opts = col_possibilities[idx]
                 single_solu_cells = get_single_solution_cells(opts)
+                if is_row and len(single_solu_cells) < ROWS:
+                    unsure_indices += 1
+                elif not is_row and len(single_solu_cells) < COLS:
+                    unsure_indices += 1
                 for ss_idx, ss_val in single_solu_cells:
                     if is_row:
                         r_idx, c_idx = idx, ss_idx
@@ -148,8 +160,8 @@ def print_board(row_list, col_list, board):
 
 
 def main():
-    input_rows = nonogram_rows_20x20_1
-    input_cols = nonogram_cols_20x20_1
+    input_rows = rows_20x20_12
+    input_cols = cols_20x20_12
     global ROWS, COLS
     ROWS = len(input_rows)
     COLS = len(input_cols)
@@ -159,6 +171,9 @@ def main():
     solve(input_rows, input_cols, board)
     print("\nSolved board:")
     print_board(input_rows, input_cols, board)
+    print('Number of iterations: ', iteration_counter)
+    print('Total number of indices scanned: ', indices_scanned)
+    print('Number of unsure indices scanned:', unsure_indices)
 
 
 main()
